@@ -10,6 +10,7 @@ const listContacts = async () => {
      return JSON.parse(contacts);    
   } catch (error) {
     console.error("listContacts", error);
+    return null;
   }
 }
 

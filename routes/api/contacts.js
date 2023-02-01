@@ -35,6 +35,12 @@ router.get('/:contactId', async (req, res, next) => {
 })
 
 router.post('/', async (req, res, next) => {
+  const data = req.body;
+  console.log(data);
+  if (Object.entries(data).length === 0) {
+    return res.status(400).json( {message: "missing required name field"} );
+  }
+
   const { error } = schema.validate(req.body);
   if (error) {
     return res.status(400).json( {message: error.details[0].message} );
@@ -57,15 +63,18 @@ router.delete('/:contactId', async (req, res, next) => {
 })
 
 router.put('/:contactId', async (req, res, next) => {
+  const data = req.body;
+  console.log(data);
+  if (Object.entries(data).length === 0) {
+    return res.status(400).json( {message: "missing required name field"} );
+  }
+
   const { error } = schemaUpdate.validate(req.body);
   if (error) {
     return res.status(400).json( {message: error.details[0].message} );
   }
   const id = req.params.contactId;
-  const data = req.body;
-  if (Object.entries(data).length === 0) {
-   res.status(400).json( {message: "missing required name field"} );
-  }
+  
   const contact = await contactsApi.updateContact(id, data);
   if (!contact) {
     return res.status(404).json({message: "Not found"});
