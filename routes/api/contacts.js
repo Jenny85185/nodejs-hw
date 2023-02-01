@@ -2,14 +2,23 @@ const express = require('express')
 const contactsApi = require('../../models/contacts.js');
 const { v4: uuidv4 } = require("uuid");
 const Joi = require("joi");
+const router = express.Router();
+const name = Joi.string();
+const email = Joi.string();
+const phone = Joi.string();
 
-const schema = Joi.object({
-  name: Joi.string().min(3).max(30).required(),
-  phone: Joi.string().min(3).required(),
-  email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ua'] } }).required()
-})
+const schemaUpdate = Joi.object().keys({
+  name: name,
+  email: email,
+  phone: phone,
+});
 
-const router = express.Router()
+const schema = Joi.object().keys({
+  name: name.required(),
+  phone: phone.required(),
+  email: email.required(),
+});
+
 
 router.get('/', async (req, res, next) => {
   const contacts = await contactsApi.listContacts();  
@@ -33,6 +42,7 @@ router.post('/', async (req, res, next) => {
   
   const { name, phone, email } = req.body;
   const dataWithId = { id: uuidv4(), name, email, phone  }
+  console.log(dataWithId);
   const contact = await contactsApi.addContact(dataWithId);
   res.status(201).json(contact);
 })
@@ -47,7 +57,7 @@ router.delete('/:contactId', async (req, res, next) => {
 })
 
 router.put('/:contactId', async (req, res, next) => {
-  const { error } = schema.validate(req.body);
+  const { error } = schemaUpdate.validate(req.body);
   if (error) {
     return res.status(400).json( {message: error.details[0].message} );
   }

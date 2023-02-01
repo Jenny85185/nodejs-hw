@@ -17,9 +17,7 @@ const getContactById = async (contactId) => {
   try {
     const contacts = await listContacts();
     const contact = contacts.find((item) => String(item.id) === String(contactId));   
-    if (!contact) {
-      return null;
-    }
+  
     return contact;
   } catch (error) {
     console.error("getContactById", error);
@@ -44,9 +42,9 @@ const removeContact = async (contactId) => {
 const addContact = async (body) => {
   try {
     const contacts = await listContacts();    
-    contacts.push(data);
+    contacts.push(body);
     await fs.writeFile(contactsPath, JSON.stringify(contacts));
-    return data;
+    return body;
   } catch (error) {
     console.error("addContact", error);
   }
