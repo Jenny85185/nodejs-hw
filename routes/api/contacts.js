@@ -3,16 +3,10 @@ const contactsApi = require('../../models/contacts.js');
 const { v4: uuidv4 } = require("uuid");
 const Joi = require("joi");
 
-const schemaAddContact = Joi.object({
+const schema = Joi.object({
   name: Joi.string().min(3).max(30).required(),
   phone: Joi.string().min(3).required(),
   email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ua'] } }).required()
-})
-
-const schemaPatchContact = Joi.object({
-  name: Joi.string().min(3).max(30),
-  phone: Joi.string().min(3),
-  email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ua'] } })
 })
 
 const router = express.Router()
@@ -32,7 +26,7 @@ router.get('/:contactId', async (req, res, next) => {
 })
 
 router.post('/', async (req, res, next) => {
-  const { error } = schemaAddContact.validate(req.body);
+  const { error } = schema.validate(req.body);
   if (error) {
     return res.status(400).json( {message: error.details[0].message} );
   }
@@ -53,16 +47,15 @@ router.delete('/:contactId', async (req, res, next) => {
 })
 
 router.put('/:contactId', async (req, res, next) => {
-  if (Object.keys(req.body).length === 0) {
-    return res.status(400).json( {message: "missing required name field"} );
-  }
-  const { error } = schemaPatchContact.validate(req.body);
+  const { error } = schema.validate(req.body);
   if (error) {
     return res.status(400).json( {message: error.details[0].message} );
   }
   const id = req.params.contactId;
   const data = req.body;
-  
+  if (Object.entries(data).length === 0) {
+   res.status(400).json( {message: "missing required name field"} );
+  }
   const contact = await contactsApi.updateContact(id, data);
   if (!contact) {
     return res.status(404).json({message: "Not found"});
